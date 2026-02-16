@@ -1,9 +1,11 @@
 [package]
 name = "cashflow"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "A terminal-based expense tracker built with Ratatui"
 license = "MIT"
+keywords = ["cli", "finance", "terminal", "tui", "expense"]
+categories = ["command-line-utilities", "finance"]
 
 [dependencies]
 ratatui = "0.29"
