@@ -138,6 +138,14 @@ fn handle_normal_input(app: &mut App, key: KeyCode, modifiers: KeyModifiers) {
             app.input_mode = InputMode::AddForm;
         }
 
+        // Cycle currency
+        KeyCode::Char('c') => {
+            app.cycle_currency_forward();
+        }
+        KeyCode::Char('C') => {
+            app.cycle_currency_backward();
+        }
+
         // Export
         KeyCode::Char('x') => {
             match app.export() {

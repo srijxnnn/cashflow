@@ -77,7 +77,7 @@ fn render_table(f: &mut Frame, app: &App, area: Rect) {
             Row::new(vec![
                 Cell::from(expense.id.to_string()),
                 Cell::from(expense.date.format("%Y-%m-%d").to_string()),
-                Cell::from(format!("${:.2}", expense.amount))
+                Cell::from(app.fmt(expense.amount))
                     .style(Style::default().fg(Color::Green)),
                 Cell::from(expense.category.to_string()),
                 Cell::from(expense.description.clone()),

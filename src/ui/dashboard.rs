@@ -48,7 +48,7 @@ fn render_summary_cards(f: &mut Frame, app: &App, area: Rect) {
         )),
         Line::from(""),
         Line::from(Span::styled(
-            format!("${:.2}", month_total),
+            app.fmt(month_total),
             Style::default()
                 .fg(Color::Green)
                 .add_modifier(Modifier::BOLD),
@@ -68,7 +68,7 @@ fn render_summary_cards(f: &mut Frame, app: &App, area: Rect) {
         )),
         Line::from(""),
         Line::from(Span::styled(
-            format!("${:.2}", year_total),
+            app.fmt(year_total),
             Style::default()
                 .fg(Color::Yellow)
                 .add_modifier(Modifier::BOLD),

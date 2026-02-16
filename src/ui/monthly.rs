@@ -133,14 +133,22 @@ fn render_category_breakdown(f: &mut Frame, app: &App, area: Rect) {
 
         let (ratio, label) = if let Some(limit) = budget {
             let r = (amount / limit).min(1.0);
-            (r, format!("{}: ${:.0} / ${:.0}", cat_name, amount, limit))
+            (
+                r,
+                format!(
+                    "{}: {} / {}",
+                    cat_name,
+                    app.fmt_compact(*amount),
+                    app.fmt_compact(limit)
+                ),
+            )
         } else {
             let r = if max_spending > 0.0 {
                 amount / max_spending
             } else {
                 0.0
             };
-            (r, format!("{}: ${:.2}", cat_name, amount))
+            (r, format!("{}: {}", cat_name, app.fmt(*amount)))
         };
 
         let color = if budget.is_some() && ratio > 0.9 {
@@ -166,25 +174,25 @@ fn render_total_summary(f: &mut Frame, app: &App, area: Rect) {
         let remaining = total_budget - total;
         let status = if remaining >= 0.0 {
             Span::styled(
-                format!("${:.2} remaining", remaining),
+                format!("{} remaining", app.fmt(remaining)),
                 Style::default().fg(Color::Green),
             )
         } else {
             Span::styled(
-                format!("${:.2} over budget!", remaining.abs()),
+                format!("{} over budget!", app.fmt(remaining.abs())),
                 Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
             )
         };
         Line::from(vec![
             Span::styled(
-                format!("Total: ${:.2}", total),
+                format!("Total: {}", app.fmt(total)),
                 Style::default()
                     .fg(Color::White)
                     .add_modifier(Modifier::BOLD),
             ),
             Span::raw("  |  "),
             Span::styled(
-                format!("Budget: ${:.2}", total_budget),
+                format!("Budget: {}", app.fmt(total_budget)),
                 Style::default().fg(Color::Yellow),
             ),
             Span::raw("  |  "),
@@ -192,7 +200,7 @@ fn render_total_summary(f: &mut Frame, app: &App, area: Rect) {
         ])
     } else {
         Line::from(Span::styled(
-            format!("Total Spent: ${:.2}", total),
+            format!("Total Spent: {}", app.fmt(total)),
             Style::default()
                 .fg(Color::White)
                 .add_modifier(Modifier::BOLD),

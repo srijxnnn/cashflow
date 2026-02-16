@@ -3,7 +3,7 @@ use chrono::Local;
 use std::fs;
 use std::path::PathBuf;
 
-use crate::model::{Budget, Expense};
+use crate::model::{Budget, Currency, Expense};
 
 fn data_dir() -> Result<PathBuf> {
     let home = dirs::home_dir().context("Could not determine home directory")?;
@@ -127,4 +127,26 @@ pub fn import_csv(path: &str, existing: &mut Vec<Expense>) -> Result<usize> {
 
 pub fn next_id(expenses: &[Expense]) -> u64 {
     expenses.iter().map(|e| e.id).max().unwrap_or(0) + 1
+}
+
+fn config_path() -> Result<PathBuf> {
+    Ok(data_dir()?.join("config"))
+}
+
+pub fn load_currency() -> Result<Currency> {
+    let path = config_path()?;
+    if !path.exists() {
+        return Ok(Currency::default());
+    }
+    let content = fs::read_to_string(&path)
+        .with_context(|| format!("Could not read config at {}", path.display()))?;
+    let code = content.trim();
+    Ok(Currency::from_code(code).unwrap_or_default())
+}
+
+pub fn save_currency(currency: &Currency) -> Result<()> {
+    let path = config_path()?;
+    fs::write(&path, currency.code())
+        .with_context(|| format!("Could not write config to {}", path.display()))?;
+    Ok(())
 }

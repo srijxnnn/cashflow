@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
 use chrono::{Datelike, Local, NaiveDate};
 
-use crate::model::{Budget, Category, Expense, Recurrence};
+use crate::model::{Budget, Category, Currency, Expense, Recurrence};
 use crate::storage;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -166,6 +166,7 @@ pub struct App {
     pub input_mode: InputMode,
     pub expenses: Vec<Expense>,
     pub budgets: Vec<Budget>,
+    pub currency: Currency,
 
     // Expenses tab state
     pub expense_table_index: usize,
@@ -188,6 +189,7 @@ impl App {
     pub fn new() -> Result<Self> {
         let expenses = storage::load_expenses().unwrap_or_default();
         let budgets = storage::load_budgets().unwrap_or_default();
+        let currency = storage::load_currency().unwrap_or_default();
         let now = Local::now();
 
         let mut app = Self {
@@ -196,6 +198,7 @@ impl App {
             input_mode: InputMode::Normal,
             expenses,
             budgets,
+            currency,
             expense_table_index: 0,
             search_query: String::new(),
             filtered_indices: Vec::new(),
@@ -395,6 +398,33 @@ impl App {
             .iter()
             .find(|b| &b.category == category)
             .map(|b| b.monthly_limit)
+    }
+
+    pub fn cycle_currency_forward(&mut self) {
+        let next_index = (self.currency.to_index() + 1) % Currency::count();
+        self.currency = Currency::from_index(next_index);
+        let _ = storage::save_currency(&self.currency);
+        self.status_message = Some(format!("Currency: {}", self.currency.display_name()));
+    }
+
+    pub fn cycle_currency_backward(&mut self) {
+        let count = Currency::count();
+        let prev_index = if self.currency.to_index() == 0 {
+            count - 1
+        } else {
+            self.currency.to_index() - 1
+        };
+        self.currency = Currency::from_index(prev_index);
+        let _ = storage::save_currency(&self.currency);
+        self.status_message = Some(format!("Currency: {}", self.currency.display_name()));
+    }
+
+    pub fn fmt(&self, amount: f64) -> String {
+        self.currency.format(amount)
+    }
+
+    pub fn fmt_compact(&self, amount: f64) -> String {
+        self.currency.format_compact(amount)
     }
 
     pub fn prev_month(&mut self) {

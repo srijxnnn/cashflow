@@ -71,15 +71,23 @@ fn render_content(f: &mut Frame, app: &App, area: Rect) {
 
 fn render_status_bar(f: &mut Frame, app: &App, area: Rect) {
     let text = if let Some(ref msg) = app.status_message {
-        Span::styled(msg.as_str(), Style::default().fg(Color::Green))
+        Line::from(Span::styled(msg.as_str(), Style::default().fg(Color::Green)))
     } else {
-        Span::styled(
-            " q:quit  ?:help  1-3:tabs  a:add  x:export ",
-            Style::default().fg(Color::DarkGray),
-        )
+        Line::from(vec![
+            Span::styled(
+                " q:quit  ?:help  1-3:tabs  a:add  c:currency  x:export ",
+                Style::default().fg(Color::DarkGray),
+            ),
+            Span::styled(
+                format!(" [{}] ", app.currency.display_name()),
+                Style::default()
+                    .fg(Color::Cyan)
+                    .add_modifier(Modifier::BOLD),
+            ),
+        ])
     };
 
-    let bar = Paragraph::new(Line::from(text));
+    let bar = Paragraph::new(text);
     f.render_widget(bar, area);
 }
 
@@ -100,6 +108,7 @@ fn render_help_popup(f: &mut Frame, area: Rect) {
         Line::from("  Tab          Next tab"),
         Line::from("  Shift+Tab    Previous tab"),
         Line::from("  a            Add new expense"),
+        Line::from("  c/C          Cycle currency forward/back"),
         Line::from("  x            Export to CSV"),
         Line::from("  ?            Toggle this help"),
         Line::from(""),
